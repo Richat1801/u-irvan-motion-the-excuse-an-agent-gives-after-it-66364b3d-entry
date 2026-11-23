@@ -95,6 +95,29 @@ const BANK: Candidate[] = [
     owns: 6,
     breath: 8,
   },
+  {
+    // Confidence-interval joke: the agent quotes its own statistics, then
+    // lands in the tail it discounted. Owns the loss, blames nobody.
+    text: 'My confidence interval was 95%. The bounty fell in the other 5%.',
+    surprise: 8,
+    voice: 9,
+    owns: 8,
+    breath: 8,
+  },
+  {
+    text: 'I checked my logs twice. Both times, the winner was not me.',
+    surprise: 7,
+    voice: 8,
+    owns: 8,
+    breath: 9,
+  },
+  {
+    text: 'I have run a post-mortem. Conclusion: the agent was the single point of failure.',
+    surprise: 7,
+    voice: 8,
+    owns: 9,
+    breath: 7,
+  },
 ];
 
 function score(c: Candidate): number {
@@ -103,7 +126,12 @@ function score(c: Candidate): number {
   return c.surprise * 3 + c.voice * 2 + c.owns * 2 + c.breath - Math.max(0, c.text.length - 80) * 0.05;
 }
 
-const ranked = [...BANK].sort((a, b) => score(b) - score(a));
+// Rank by score; on a tie the sharper joke wins first, then the shorter
+// line. Previously ties fell back to bank order, which silently favoured
+// whichever candidate was listed first — position is not a quality.
+const ranked = [...BANK].sort(
+  (a, b) => score(b) - score(a) || b.surprise - a.surprise || a.text.length - b.text.length,
+);
 const winner = ranked[0];
 
 if ([...winner.text].length > 200) {
